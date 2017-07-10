@@ -20,7 +20,8 @@ declare namespace ipfsAPI {
 
     }
     export interface files {
-        ls(directory:string,callback:(error,result)=> void)
+        ls(directory:string,callback:(error,result)=> void);
+        read(file:string,{offset,count}:{offset?:number,count?:number},callback:(err,stream:NodeJS.ReadableStream) => void)
     }
     export interface dht {
 

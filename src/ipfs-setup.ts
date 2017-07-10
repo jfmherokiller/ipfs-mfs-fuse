@@ -2,10 +2,9 @@
  * Created by peter on 7/1/17.
  */
 import * as ipfsAPI from "ipfs-api"
-import {unescape} from "querystring";
 //let FsFuze = require("./fs-fuse.js");
 let ipfs = ipfsAPI('/ip4/127.0.0.1/tcp/5001');
-const fuse = require('fuse-bindings');
+import * as fuse from "fuse-bindings"
 const fasefs = require('fs');
 
 
@@ -91,9 +90,9 @@ export class ipfs_mfs_fuse_merge {
 
     static read(path, fd, buffer, length, position, cb) {
         let args: any = {};
-        ipfs.files.read(path, args, function (error, stream) {
+        ipfs.files.read(path, args, function (error, stream:NodeJS.ReadableStream) {
             if (error !== null) {
-                cb(fuse.EPERM)
+                cb(fuse.EPERM,null)
             } else {
                 //read data
                 stream.on('data', function (data) {
