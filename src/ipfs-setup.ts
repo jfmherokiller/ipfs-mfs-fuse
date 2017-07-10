@@ -78,25 +78,22 @@ export class ipfs_mfs_fuse_merge {
 
     static write(path, handle, buf, len, offset, cb) {
         console.log('write(%s)', path);
-        cb(fuse.EPERM,null)
+        cb(fuse.EPERM, null)
     }
 
     static read(path, fd, buffer, length, position, cb) {
-        buffer = Buffer.from("");
         let args: any = {};
-        console.log('read(path:%s,filedescriptor:%s,length:%s,position:%s)', path,fd,length,position);
-        ipfs.files.read(path, args, function (error, stream:NodeJS.ReadableStream) {
+        console.log('read(path:%s,filedescriptor:%s,length:%s,position:%s)', path, fd, length, position);
+        ipfs.files.read(path, args, function (error, stream: NodeJS.ReadableStream) {
             if (error !== null) {
                 console.log(error);
-                cb(fuse.EPERM,null)
+                cb(fuse.EPERM, null)
             } else {
                 //read data
                 getStrem.buffer(stream).then(function (data) {
-                    console.log(data);
                     if (position >= data.length) return cb(0); // done
-                    let part = data.slice();
+                    let part = data.slice(position, position + length);
                     part.copy(buffer); // write the result of the read to the result buffer
-                    console.log(buffer);
                     cb(part.length) // return the number of bytes read
                 })
             }
@@ -114,10 +111,3 @@ export class ipfs_mfs_fuse_merge {
         cb(0);
     }
 }
-
-ipfs.files.read("/stuff/scripts/git-ipfs-rehost.ps1",function (error,stream) {
-   getStrem.buffer(stream).then(function (data) {
-      console.log(data);
-       console.log(data.length);
-   });
-});
