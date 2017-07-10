@@ -5,6 +5,8 @@ import * as ipfsAPI from "ipfs-api"
 //let FsFuze = require("./fs-fuse.js");
 let ipfs = ipfsAPI('/ip4/127.0.0.1/tcp/5001');
 import * as fuse from "fuse-bindings"
+import * as getStrem from "get-stream";
+import Options = require("get-stream");
 const fasefs = require('fs');
 
 
@@ -69,42 +71,36 @@ export class ipfs_mfs_fuse_merge {
 
     static statfs(path, cb) {
         cb(0, {
-            bsize: 1000000,
-            frsize: 1000000,
-            blocks: 1000000,
-            bfree: 1000000,
-            bavail: 1000000,
-            files: 1000000,
-            ffree: 1000000,
-            favail: 1000000,
-            fsid: 1000000,
-            flag: 1000000,
-            namemax: 1000000
+            type: 0x5346544e,
+            bsize: 512
         })
     }
 
     static write(path, handle, buf, len, offset, cb) {
         console.log('write(%s)', path);
-        cb(fuse.EPERM)
+        cb(fuse.EPERM,null)
     }
 
     static read(path, fd, buffer, length, position, cb) {
+        buffer = Buffer.from("");
         let args: any = {};
+        console.log('read(path:%s,filedescriptor:%s,length:%s,position:%s)', path,fd,length,position);
         ipfs.files.read(path, args, function (error, stream:NodeJS.ReadableStream) {
             if (error !== null) {
+                console.log(error);
                 cb(fuse.EPERM,null)
             } else {
                 //read data
-                stream.on('data', function (data) {
-                    buffer += data;
-                    cb(data.length);
-                    //end of data
-                }).on('end',function() {
-                    cb(0);
-                });
+                getStrem.buffer(stream).then(function (data) {
+                    console.log(data);
+                    if (position >= data.length) return cb(0); // done
+                    let part = data.slice();
+                    part.copy(buffer); // write the result of the read to the result buffer
+                    console.log(buffer);
+                    cb(part.length) // return the number of bytes read
+                })
             }
         });
-        console.log('read(%s)', path);
     }
 
     static mkdir(path, mode, cb) {
@@ -118,3 +114,10 @@ export class ipfs_mfs_fuse_merge {
         cb(0);
     }
 }
+
+ipfs.files.read("/stuff/scripts/git-ipfs-rehost.ps1",function (error,stream) {
+   getStrem.buffer(stream).then(function (data) {
+      console.log(data);
+       console.log(data.length);
+   });
+});
