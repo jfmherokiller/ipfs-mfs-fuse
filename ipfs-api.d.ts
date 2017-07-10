@@ -41,6 +41,9 @@ declare namespace ipfsAPI {
 
     }
     export interface pin {
+        add()
+        rm()
+        ls()
 
     }
 }
