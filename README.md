@@ -11,3 +11,8 @@ cd into the src directory and run "node main.js" this should mount the mfs on th
 if you are on linux create a mnt folder in the src folder and the filesystem should be mounted there.
 
 Sorry if the stuff is a mess i made it in one day.
+
+
+## Related
+
+* https://github.com/ipfs/roadmap/issues/90
